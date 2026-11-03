@@ -3,28 +3,48 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Stacje NOAA</title>
+    <title>NOAA CDO</title>
     <link rel="stylesheet" href="style.css">
   </head>
   <body>
     <main>
-      <h1>Stacje meteorologiczne NOAA</h1>
+      <h1>Dane klimatyczne NOAA</h1>
 
-      <button type="button" id="loadBtn">Pobierz stacje</button>
+      <section class="panel" aria-labelledby="stationsHeading">
+        <h2 id="stationsHeading">3.2.1 Stacje meteorologiczne</h2>
+        <button type="button" id="loadStationsBtn">Pobierz stacje</button>
+        <p id="stationsStatus" aria-live="polite"></p>
+        <table id="stationsTable" hidden>
+          <thead>
+            <tr>
+              <th>Station ID</th>
+              <th>Name</th>
+              <th>Latitude</th>
+              <th>Longitude</th>
+            </tr>
+          </thead>
+          <tbody id="stationsBody"></tbody>
+        </table>
+      </section>
 
-      <p id="status" aria-live="polite"></p>
-
-      <table id="stationsTable" hidden>
-        <thead>
-          <tr>
-            <th>Station ID</th>
-            <th>Name</th>
-            <th>Latitude</th>
-            <th>Longitude</th>
-          </tr>
-        </thead>
-        <tbody id="stationsBody"></tbody>
-      </table>
+      <section class="panel" aria-labelledby="datasetsHeading">
+        <h2 id="datasetsHeading">3.2.2 Datasets</h2>
+        <button type="button" id="loadDatasetsBtn">Pobierz datasety</button>
+        <p id="datasetsStatus" aria-live="polite"></p>
+        <table id="datasetsTable" hidden>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Description</th>
+              <th>Min date</th>
+              <th>Max date</th>
+              <th>Typ</th>
+            </tr>
+          </thead>
+          <tbody id="datasetsBody"></tbody>
+        </table>
+      </section>
     </main>
 
     <script src="config.js"></script>
