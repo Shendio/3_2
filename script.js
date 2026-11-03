@@ -17,7 +17,17 @@
         throw new Error('401 Unauthorized — sprawdź token API w config.js.')
       }
       if (!response.ok) {
-        throw new Error('Błąd pobierania danych (HTTP ' + response.status + ').')
+        return response.json().catch(function () {
+          return {}
+        }).then(function (body) {
+          const detail = body.message || body.error || ''
+          throw new Error(
+            'Błąd pobierania danych (HTTP ' +
+              response.status +
+              ')' +
+              (detail ? ': ' + detail : '.')
+          )
+        })
       }
       return response.json()
     })
@@ -187,4 +197,90 @@
   }
 
   loadDatasetsBtn.addEventListener('click', loadDatasets)
+
+  // --- dane z parametrami ---
+
+  const dataForm = document.getElementById('dataForm')
+  const loadDataBtn = document.getElementById('loadDataBtn')
+  const dataStatus = document.getElementById('dataStatus')
+  const dataTable = document.getElementById('dataTable')
+  const dataBody = document.getElementById('dataBody')
+
+  const DATE_RE = /^\d{4}-\d{2}-\d{2}$/
+
+  function renderDataRows(rows) {
+    dataBody.innerHTML = ''
+
+    rows.forEach(function (row) {
+      const tr = document.createElement('tr')
+      appendCells(tr, [
+        row.date || '—',
+        row.datatype || '—',
+        row.value != null ? row.value : '—'
+      ])
+      dataBody.appendChild(tr)
+    })
+
+    dataTable.hidden = false
+  }
+
+  dataForm.addEventListener('submit', function (event) {
+    event.preventDefault()
+
+    const datasetid = document.getElementById('datasetid').value.trim()
+    const locationid = document.getElementById('locationid').value.trim()
+    const startdate = document.getElementById('startdate').value.trim()
+    const enddate = document.getElementById('enddate').value.trim()
+
+    if (!datasetid || !locationid || !startdate || !enddate) {
+      dataStatus.textContent = 'Wypełnij wszystkie pola.'
+      return
+    }
+
+    if (!DATE_RE.test(startdate) || !DATE_RE.test(enddate)) {
+      dataStatus.textContent = 'Daty muszą być w formacie YYYY-MM-DD.'
+      return
+    }
+
+    dataStatus.textContent = 'Pobieranie danych…'
+    dataTable.hidden = true
+    dataBody.innerHTML = ''
+    loadDataBtn.disabled = true
+
+    const params = new URLSearchParams({
+      datasetid: datasetid,
+      locationid: locationid,
+      startdate: startdate,
+      enddate: enddate,
+      limit: '1000'
+    })
+
+    fetchNoaa('/api/data?' + params.toString())
+      .then(function (json) {
+        const rows = json.results || []
+
+        if (!rows.length) {
+          dataTable.hidden = true
+          dataBody.innerHTML = ''
+          dataStatus.textContent = 'Brak danych'
+          return
+        }
+
+        renderDataRows(rows)
+
+        const total = json.metadata?.resultset?.count
+        dataStatus.textContent =
+          'Wyświetlono: ' +
+          rows.length +
+          (total != null ? ' z ' + total : '')
+      })
+      .catch(function (error) {
+        dataTable.hidden = true
+        dataBody.innerHTML = ''
+        dataStatus.textContent = error.message || 'Wystąpił błąd.'
+      })
+      .finally(function () {
+        loadDataBtn.disabled = false
+      })
+  })
 })()

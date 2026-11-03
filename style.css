@@ -50,9 +50,38 @@ button:disabled {
 }
 
 #stationsStatus,
-#datasetsStatus {
+#datasetsStatus,
+#dataStatus {
   min-height: 1.5em;
   color: #444;
+}
+
+#dataForm {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1rem;
+  align-items: flex-end;
+  margin-bottom: 0.75rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 140px;
+}
+
+.field label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.field input {
+  padding: 0.45rem 0.65rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
 }
 
 table {
