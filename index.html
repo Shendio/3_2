@@ -3,37 +3,27 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Wyszukiwanie po stolicy</title>
+    <title>Stacje NOAA</title>
     <link rel="stylesheet" href="style.css">
   </head>
   <body>
     <main>
-      <h1>Wyszukiwanie kraju według stolicy</h1>
+      <h1>Stacje meteorologiczne NOAA</h1>
 
-      <form id="searchForm">
-        <label for="capital">Stolica:</label>
-        <input
-          type="text"
-          id="capital"
-          name="capital"
-          placeholder="np. Warsaw"
-        >
-        <button type="submit">Szukaj</button>
-      </form>
+      <button type="button" id="loadBtn">Pobierz stacje</button>
 
       <p id="status" aria-live="polite"></p>
 
-      <table id="countriesTable" hidden>
+      <table id="stationsTable" hidden>
         <thead>
           <tr>
+            <th>Station ID</th>
             <th>Name</th>
-            <th>Capital</th>
-            <th>Population</th>
-            <th>Region</th>
-            <th>Subregion</th>
+            <th>Latitude</th>
+            <th>Longitude</th>
           </tr>
         </thead>
-        <tbody id="countriesBody"></tbody>
+        <tbody id="stationsBody"></tbody>
       </table>
     </main>
 

@@ -1,74 +1,55 @@
 (function () {
-  const form = document.getElementById('searchForm')
-  const capitalInput = document.getElementById('capital')
+  const loadBtn = document.getElementById('loadBtn')
   const status = document.getElementById('status')
-  const table = document.getElementById('countriesTable')
-  const tbody = document.getElementById('countriesBody')
+  const table = document.getElementById('stationsTable')
+  const tbody = document.getElementById('stationsBody')
 
-  function getCapitalName(country) {
-    return country.capitals?.[0]?.name || '—'
-  }
+  const API_URL = '/api/stations?limit=100'
 
-  function renderCountries(countries) {
+  function renderStations(stations) {
     tbody.innerHTML = ''
 
-    for (const country of countries) {
+    stations.forEach(function (station) {
       const tr = document.createElement('tr')
 
       const values = [
-        country.names?.common || '—',
-        getCapitalName(country),
-        country.population != null ? country.population : '—',
-        country.region || '—',
-        country.subregion || '—'
+        station.id || '—',
+        station.name || '—',
+        station.latitude != null ? station.latitude : '—',
+        station.longitude != null ? station.longitude : '—'
       ]
 
-      for (const value of values) {
+      values.forEach(function (value) {
         const td = document.createElement('td')
         td.textContent = value
         tr.appendChild(td)
-      }
+      })
 
       tbody.appendChild(tr)
-    }
+    })
 
     table.hidden = false
   }
 
-  form.addEventListener('submit', function (event) {
-    event.preventDefault()
-
-    const capital = capitalInput.value.trim()
-    if (!capital) {
-      status.textContent = 'Wpisz nazwę stolicy.'
-      table.hidden = true
-      tbody.innerHTML = ''
-      return
-    }
-
+  function loadStations() {
     if (!window.API_KEY) {
       status.textContent = 'Brak API_KEY w config.js.'
       return
     }
 
-    status.textContent = 'Pobieranie danych…'
+    status.textContent = 'Pobieranie stacji…'
     table.hidden = true
     tbody.innerHTML = ''
+    loadBtn.disabled = true
 
-    const url =
-      'https://api.restcountries.com/countries/v5/capitals/' +
-      encodeURIComponent(capital) +
-      '?response_fields=names.common,capitals,population,region,subregion'
-
-    fetch(url, {
+    fetch(API_URL, {
       headers: {
-        Authorization: 'Bearer ' + window.API_KEY,
-        Accept: 'application/json'
+        token: window.API_KEY
       }
     })
       .then(function (response) {
-        if (response.status === 404) {
-          throw new Error('Nie znaleziono kraju dla podanej stolicy.')
+        if (response.status === 401) {
+          throw new Error('401 Unauthorized — sprawdź token API w config.js.')
         }
         if (!response.ok) {
           throw new Error('Błąd pobierania danych (HTTP ' + response.status + ').')
@@ -76,22 +57,29 @@
         return response.json()
       })
       .then(function (json) {
-        const countries = json?.data?.objects || []
+        const stations = json.results || []
 
-        if (!countries.length) {
-          throw new Error('Nie znaleziono kraju dla podanej stolicy.')
+        if (!stations.length) {
+          throw new Error('Brak stacji w odpowiedzi API.')
         }
 
-        renderCountries(countries)
+        renderStations(stations)
+
+        const total = json.metadata?.resultset?.count
         status.textContent =
-          'Znaleziono: ' +
-          countries.length +
-          (countries.length === 1 ? ' kraj' : ' krajów')
+          'Wyświetlono: ' +
+          stations.length +
+          (total != null ? ' z ' + total + ' dostępnych' : '')
       })
       .catch(function (error) {
         table.hidden = true
         tbody.innerHTML = ''
         status.textContent = error.message || 'Wystąpił błąd.'
       })
-  })
+      .finally(function () {
+        loadBtn.disabled = false
+      })
+  }
+
+  loadBtn.addEventListener('click', loadStations)
 })()
